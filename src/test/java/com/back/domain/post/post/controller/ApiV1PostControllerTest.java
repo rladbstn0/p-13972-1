@@ -29,18 +29,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ApiV1PostControllerTest {
     @Autowired
     private MockMvc mvc;
+
     @Autowired
     private PostService postService;
+
+    @Autowired
+    private MemberService memberService;
 
     @Test
     @DisplayName("글 쓰기")
     void t1() throws Exception {
         Member actor = memberService.findByUsername("user1").get();
         String actorApiKey = actor.getApiKey();
+
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/posts?apiKey=" + actorApiKey)
+                        post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + actorApiKey)
                                 .content("""
                                         {
                                             "title": "제목",
@@ -70,10 +76,14 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 쓰기, without title")
     void t7() throws Exception {
+        Member actor = memberService.findByUsername("user1").get();
+        String actorApiKey = actor.getApiKey();
+
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + actorApiKey)
                                 .content("""
                                         {
                                             "title": "",
@@ -97,10 +107,14 @@ public class ApiV1PostControllerTest {
     @Test
     @DisplayName("글 쓰기, without content")
     void t8() throws Exception {
+        Member actor = memberService.findByUsername("user1").get();
+        String actorApiKey = actor.getApiKey();
+
         ResultActions resultActions = mvc
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + actorApiKey)
                                 .content("""
                                         {
                                             "title": "제목",
@@ -125,6 +139,9 @@ public class ApiV1PostControllerTest {
     @DisplayName("글 쓰기, with wrong json syntax")
     void t9() throws Exception {
 
+        Member actor = memberService.findByUsername("user1").get();
+        String actorApiKey = actor.getApiKey();
+
         String wrongJsonBody = """
                 {
                     "title": 제목",
@@ -135,6 +152,7 @@ public class ApiV1PostControllerTest {
                 .perform(
                         post("/api/v1/posts")
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + actorApiKey)
                                 .content(wrongJsonBody)
                 )
                 .andDo(print());
@@ -152,11 +170,15 @@ public class ApiV1PostControllerTest {
     @DisplayName("글 수정")
     void t2() throws Exception {
         int id = 1;
+        Post post = postService.findById(id).get();
+        Member actor = post.getAuthor();
+        String actorApiKey = actor.getApiKey();
 
         ResultActions resultActions = mvc
                 .perform(
                         put("/api/v1/posts/" + id)
                                 .contentType(MediaType.APPLICATION_JSON)
+                                .header("Authorization", "Bearer " + actorApiKey)
                                 .content("""
                                         {
                                             "title": "제목 new",
@@ -178,10 +200,14 @@ public class ApiV1PostControllerTest {
     @DisplayName("글 삭제")
     void t3() throws Exception {
         int id = 1;
+        Post post = postService.findById(id).get();
+        Member actor = post.getAuthor();
+        String actorApiKey = actor.getApiKey();
 
         ResultActions resultActions = mvc
                 .perform(
                         delete("/api/v1/posts/" + id)
+                                .header("Authorization", "Bearer " + actorApiKey)
                 )
                 .andDo(print());
 
@@ -269,7 +295,4 @@ public class ApiV1PostControllerTest {
                     .andExpect(jsonPath("$[%d].content".formatted(i)).value(post.getContent()));
         }
     }
-
-    @Autowired
-    private MemberService memberService;
 }
