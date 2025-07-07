@@ -131,7 +131,30 @@ public class ApiV1MemberControllerTest {
                 .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(member.getCreateDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.data.modifyDate").value(Matchers.startsWith(member.getModifyDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.data.name").value(member.getName()));
+    }
 
+    @Test
+    @DisplayName("내 정보, whit apiKey Cookie")
+    void t4() throws Exception {
+        Member actor = memberService.findByUsername("user1").get();
+        String actorApiKey = actor.getApiKey();
 
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/members/me")
+                                .cookie(new Cookie("apiKey", actorApiKey)))
+                .andDo(print());
+
+        Member member = memberService.findByUsername("user1").get();
+
+        resultActions
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.id").value(member.getId()))
+                .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(member.getCreateDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.data.id").value(member.getId()))
+                .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(member.getCreateDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.data.modifyDate").value(Matchers.startsWith(member.getModifyDate().toString().substring(0, 20))))
+                .andExpect(jsonPath("$.data.name").value(member.getName()));
     }
 }
