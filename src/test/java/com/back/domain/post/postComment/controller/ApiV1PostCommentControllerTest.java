@@ -30,8 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ApiV1PostCommentControllerTest {
     @Autowired
     private MockMvc mvc;
+
     @Autowired
     private PostService postService;
+
     @Autowired
     private MemberService memberService;
 
@@ -57,8 +59,9 @@ public class ApiV1PostCommentControllerTest {
                 .andExpect(jsonPath("$.id").value(postComment.getId()))
                 .andExpect(jsonPath("$.createDate").value(Matchers.startsWith(postComment.getCreateDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.modifyDate").value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
-                .andExpect(jsonPath("$.authorId").value(post.getAuthor().getId()))
-                .andExpect(jsonPath("$.authorName").value(post.getAuthor().getNickname()))
+                .andExpect(jsonPath("$.authorId").value(postComment.getAuthor().getId()))
+                .andExpect(jsonPath("$.authorName").value(postComment.getAuthor().getName()))
+                .andExpect(jsonPath("$.postId").value(postComment.getPost().getId()))
                 .andExpect(jsonPath("$.content").value(postComment.getContent()));
     }
 
@@ -110,7 +113,7 @@ public class ApiV1PostCommentControllerTest {
         ResultActions resultActions = mvc
                 .perform(
                         delete("/api/v1/posts/%d/comments/%d".formatted(postId, id))
-                                .header("Authorization", actorApiKey)
+                                .header("Authorization", "Bearer " + actorApiKey)
                 )
                 .andDo(print());
 
@@ -123,10 +126,35 @@ public class ApiV1PostCommentControllerTest {
     }
 
     @Test
+    @DisplayName("댓글 삭제, without permission")
+    void t7() throws Exception {
+        int postId = 1;
+        int id = 1;
+
+        Member actor = memberService.findByUsername("user3").get();
+        String actorApiKey = actor.getApiKey();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/api/v1/posts/%d/comments/%d".formatted(postId, id))
+                                .header("Authorization", "Bearer " + actorApiKey)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostCommentController.class))
+                .andExpect(handler().methodName("delete"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-2"))
+                .andExpect(jsonPath("$.msg").value("%d번 댓글 삭제권한이 없습니다.".formatted(id)));
+    }
+
+    @Test
     @DisplayName("댓글 수정")
     void t4() throws Exception {
         int postId = 1;
         int id = 1;
+
         Post post = postService.findById(postId).get();
         PostComment postComment = post.findCommentById(id).get();
         Member actor = postComment.getAuthor();
@@ -154,9 +182,40 @@ public class ApiV1PostCommentControllerTest {
     }
 
     @Test
+    @DisplayName("댓글 수정, without permission")
+    void t6() throws Exception {
+        int postId = 1;
+        int id = 1;
+
+        Member actor = memberService.findByUsername("user3").get();
+        String actorApiKey = actor.getApiKey();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        put("/api/v1/posts/%d/comments/%d".formatted(postId, id))
+                                .header("Authorization", "Bearer " + actorApiKey)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                            "content": "내용 new"
+                                        }
+                                        """)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(ApiV1PostCommentController.class))
+                .andExpect(handler().methodName("modify"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.resultCode").value("403-1"))
+                .andExpect(jsonPath("$.msg").value("%d번 댓글 수정권한이 없습니다.".formatted(id)));
+    }
+
+    @Test
     @DisplayName("댓글 작성")
     void t5() throws Exception {
         int postId = 1;
+
         Member actor = memberService.findByUsername("user1").get();
         String actorApiKey = actor.getApiKey();
 
@@ -186,8 +245,9 @@ public class ApiV1PostCommentControllerTest {
                 .andExpect(jsonPath("$.data.id").value(postComment.getId()))
                 .andExpect(jsonPath("$.data.createDate").value(Matchers.startsWith(postComment.getCreateDate().toString().substring(0, 20))))
                 .andExpect(jsonPath("$.data.modifyDate").value(Matchers.startsWith(postComment.getModifyDate().toString().substring(0, 20))))
-                .andExpect(jsonPath("$.data.authorId").value(post.getAuthor().getId()))
-                .andExpect(jsonPath("$.data.authorName").value(post.getAuthor().getNickname()))
+                .andExpect(jsonPath("$.data.authorId").value(postComment.getAuthor().getId()))
+                .andExpect(jsonPath("$.data.authorName").value(postComment.getAuthor().getName()))
+                .andExpect(jsonPath("$.data.postId").value(postComment.getPost().getId()))
                 .andExpect(jsonPath("$.data.content").value("내용"));
     }
 }
