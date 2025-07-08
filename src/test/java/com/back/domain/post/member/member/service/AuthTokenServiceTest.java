@@ -81,15 +81,21 @@ public class AuthTokenServiceTest {
     @Test
     @DisplayName("Ut.jwt.toString 를 통해서 JWT 생성, {name=\"Paul\", age=23}")
     void t3() {
+        Map<String, Object> payload = Map.of("name", "Paul", "age", 23);
+
         String jwt = Ut.jwt.toString(
                 secret,
                 expireSeconds,
-                Map.of("name", "Paul", "age", 23)
+                payload
         );
 
         assertThat(jwt).isNotBlank();
 
-        System.out.println("jwt = " + jwt);
+        assertThat(Ut.jwt.isValid(secret, jwt))
+                .isTrue();
+        Map<String, Object> parsedPayload = Ut.jwt.payload(secret, jwt);
+
+        assertThat(parsedPayload).containsAllEntriesOf(payload);
     }
 
     @Test
@@ -102,5 +108,15 @@ public class AuthTokenServiceTest {
         assertThat(accessToken).isNotBlank();
 
         System.out.println("accessToken = " + accessToken);
+
+        Map<String, Object> parsedPayload = authTokenService.payload(secret, accessToken);
+
+        assertThat(parsedPayload)
+                .containsAllEntriesOf(
+                        Map.of(
+                                "id", memberUser1.getId(),
+                                "username", memberUser1.getUsername()
+                        )
+                );
     }
 }
