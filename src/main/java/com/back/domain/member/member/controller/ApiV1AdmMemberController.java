@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,4 +31,12 @@ public class ApiV1AdmMemberController {
                 .toList();
     }
 
+    @GetMapping("/{id}")
+    public MemberWithUsernameDto getItem(
+            @PathVariable int id
+    ) {
+        Member member = memberService.findById(id).get();
+
+        return new MemberWithUsernameDto(member);
+    }
 }
