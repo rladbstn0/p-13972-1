@@ -121,7 +121,6 @@ public class AuthTokenServiceTest {
                         Map.of(
                                 "id", memberUser1.getId(),
                                 "username", memberUser1.getUsername(),
-                                "username", memberUser1.getUsername(),
                                 "name", memberUser1.getName()
                         )
                 );
