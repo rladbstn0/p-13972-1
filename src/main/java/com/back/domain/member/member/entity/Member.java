@@ -19,7 +19,7 @@ public class Member extends BaseEntity {
     @Column(unique = true)
     private String apiKey;
 
-    public Member(int id, String username, String name){
+    public Member(int id, String username, String name) {
         this.id = id;
         this.username = username;
         setName(name);
@@ -42,5 +42,12 @@ public class Member extends BaseEntity {
 
     public void modifyApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    public boolean isAdmin() {
+        if ("system".equals(username)) return true;
+        if ("admin".equals(username)) return true;
+
+        return false;
     }
 }
