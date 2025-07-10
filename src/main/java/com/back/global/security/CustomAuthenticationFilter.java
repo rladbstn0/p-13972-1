@@ -17,6 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomAuthenticationFilter extends OncePerRequestFilter {
     private final Rq rq;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         logger.debug("Processing request for " + request.getRequestURI());
@@ -28,7 +29,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         }
 
         // 인증, 인가가 필요없는 API 요청이라면 패스
-        if (List.of("/api/v1/members/login", "/api/v1/members/logout", "/api/v1/members/join").contains(request.getRequestURI())) {
+        if (List.of("/api/v1/members/login", "/api/v1/members/logout", "/api/v1/members").contains(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -53,6 +54,14 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
         logger.debug("apiKey : " + apiKey);
         logger.debug("accessToken : " + accessToken);
+
+        boolean isApiKeyExists = !apiKey.isBlank();
+        boolean isAccessTokenExists = !accessToken.isBlank();
+
+        if (!isApiKeyExists && !isAccessTokenExists) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         filterChain.doFilter(request, response);
     }
