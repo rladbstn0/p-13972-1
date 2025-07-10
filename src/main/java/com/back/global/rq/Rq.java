@@ -74,6 +74,13 @@ public class Rq {
         return member;
     }
 
+    public String getHeader(String name, String defaultValue) {
+        return Optional
+                .ofNullable(req.getHeader(name))
+                .filter(headerValue -> !headerValue.isBlank())
+                .orElse(defaultValue);
+    }
+
     public void setHeader(String name, String value) {
         if (value == null) value = "";
 
@@ -83,15 +90,6 @@ public class Rq {
             resp.setHeader(name, value);
         }
     }
-
-    public String getHeader(String name, String defaultValue) {
-        return Optional
-                .ofNullable(req.getHeader(name))
-                .filter(headerValue -> !headerValue.isBlank())
-                .orElse(defaultValue);
-    }
-
-
 
     public String getCookieValue(String name, String defaultValue) {
         return Optional
