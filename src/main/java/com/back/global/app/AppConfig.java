@@ -1,8 +1,11 @@
 package com.back.global.app;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class AppConfig {
@@ -24,7 +27,13 @@ public class AppConfig {
     public static boolean isProd() {
         return environment.matchesProfiles("prod");
     }
+
     public static boolean isNotProd() {
         return !isProd();
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
