@@ -25,6 +25,7 @@ public class ApiV1MemberController {
     private final MemberService memberService;
     private final Rq rq;
 
+
     record MemberJoinReqBody(
             @NotBlank
             @Size(min = 2, max = 30)
@@ -80,8 +81,10 @@ public class ApiV1MemberController {
         Member member = memberService.findByUsername(reqBody.username())
                 .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 아이디입니다."));
 
-        if (!member.getPassword().equals(reqBody.password()))
-            throw new ServiceException("401-2", "비밀번호가 일치하지 않습니다.");
+        memberService.checkPassword(
+                member,
+                reqBody.password()
+        );
 
         String accessToken = memberService.genAccessToken(member);
 
@@ -94,9 +97,11 @@ public class ApiV1MemberController {
                 new MemberLoginResBody(
                         new MemberDto(member),
                         member.getApiKey(),
-                        accessToken                )
+                        accessToken
+                )
         );
     }
+
 
     @DeleteMapping("/logout")
     public RsData<Void> logout() {
@@ -108,9 +113,12 @@ public class ApiV1MemberController {
         );
     }
 
+
     @GetMapping("/me")
     public MemberWithUsernameDto me() {
-        Member actor = memberService.findById(rq.getActor().getId()).get();
+        Member actor = memberService
+                .findById(rq.getActor().getId())
+                .get();
 
         return new MemberWithUsernameDto(actor);
     }
