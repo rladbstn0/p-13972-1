@@ -3,6 +3,7 @@ package com.back.global.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
@@ -18,11 +19,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/favicon.ico").permitAll()
-                                .requestMatchers("/h2-console/**").permitAll()
-                                .requestMatchers("/api/*/adm/**").hasRole("ADMIN")
-                                .requestMatchers("/**").permitAll()
-                                .anyRequest().authenticated()
+                        .requestMatchers("/favicon.ico").permitAll()
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/*/posts/{id:\\d+}", "/api/*/posts", "/api/*/posts/{postId:\\d+}/comments", "/api/*/posts/{postId:\\d+}/comments/{id:\\d+}").permitAll()
+                        .requestMatchers("/api/*/members/login", "/api/*/members/logout").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/*/members").permitAll()
+                        .requestMatchers("/api/*/adm/**").hasRole("ADMIN")
+                        .requestMatchers("/api/*/**").authenticated()
+                        .anyRequest().permitAll()
                 )
                 .headers(
                         headers -> headers
@@ -65,6 +69,7 @@ public class SecurityConfig {
                                             );
                                         }
                                 )
-                );        return http.build();
+                );
+        return http.build();
     }
 }
