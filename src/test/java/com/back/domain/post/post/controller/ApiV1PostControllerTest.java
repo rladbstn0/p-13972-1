@@ -266,7 +266,6 @@ public class ApiV1PostControllerTest {
                 .andExpect(jsonPath("$.msg").value("API 키가 유효하지 않습니다."));
     }
 
-
     @Test
     @DisplayName("글 수정")
     void t2() throws Exception {
