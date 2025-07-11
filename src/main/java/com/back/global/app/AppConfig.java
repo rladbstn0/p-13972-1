@@ -1,5 +1,9 @@
 package com.back.global.app;
 
+import com.back.standard.util.Ut;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,5 +39,18 @@ public class AppConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Getter
+    private static ObjectMapper objectMapper;
+
+    @Autowired
+    public void setObjectMapper(ObjectMapper objectMapper) {
+        AppConfig.objectMapper = objectMapper;
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+        Ut.json.objectMapper = objectMapper;
     }
 }

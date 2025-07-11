@@ -1,6 +1,7 @@
 package com.back.global.security;
 
 import com.back.global.rsData.RsData;
+import com.back.standard.util.Ut;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -48,7 +49,7 @@ public class SecurityConfig {
 
                                             response.setStatus(401);
                                             response.getWriter().write(
-                                                    objectMapper.writeValueAsString(
+                                                    Ut.json.toString(
                                                             new RsData<Void>(
                                                                     "401-1",
                                                                     "로그인 후 이용해주세요."
