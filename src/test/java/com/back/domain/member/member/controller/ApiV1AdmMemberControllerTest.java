@@ -130,4 +130,20 @@ public class ApiV1AdmMemberControllerTest {
                 .andExpect(jsonPath("$.resultCode").value("403-1"))
                 .andExpect(jsonPath("$.msg").value("권한이 없습니다."));
     }
+
+    @Test
+    @DisplayName("Authorization 헤더가 Bearer 형식이 아닐 때 오류")
+    void t8() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/members/me")
+                                .header("Authorization", "key")
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.resultCode").value("401-2"))
+                .andExpect(jsonPath("$.msg").value("Authorization 헤더가 Bearer 형식이 아닙니다."));
+    }
 }
