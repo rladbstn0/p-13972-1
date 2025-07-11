@@ -31,7 +31,7 @@ public class HomeController {
     }
 
     @GetMapping(value = "/test/fetchPosts", produces = TEXT_HTML_VALUE)
-    @Operation(summary = "")
+    @Operation(summary = "fetchPosts 테스트")
     public String testFetchPosts() {
         return """
                 <script>
